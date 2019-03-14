@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>reveal.js</title>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Redux Saga <div><img class="vs" src="./img/vs.png" alt="versus"></div> Redux Middleware</h2>
+        </section>
+        <section>
+          <h3>Problems with Sagas</h3>
+          <ul>
+            <li>New saga for each API that is attached to AJAX</li>
+            <li>Sagas are difficult to test w/o testing internals</li>
+            <li>Many devs are not familiar with generators</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Woudn't it be nice</h2>
+          <p>If I could just create an action and everything else would be handled automatically?</p>
+        </section>
+        <section>
+          <h2>Proposal</h2>
+          <p>Use a custom middleware to manage all Redux related AJAX handling</p>
+        </section>
+        <section>
+          <h3>Benefits of a custom middleware</h3>
+          <ul>
+            <li>Doesn't have to be created for each new endpoint</li>
+            <li>Can be shared between microsites</li>
+            <li>Simple to test since it's just a function.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>How would that look</h2>
+        </section>
+        <section>
+          <h5>Middleware</h5>
+          <pre>
+            <code>import axios, { AxiosResponse } from 'axios';
+import {
+  AnyAction,
+  Middleware,
+} from 'redux';
+import ACTION_TYPES from './actionTypes';
+import { Dispatch } from 'react-redux';
+
+export interface AxiosMiddlewareActionPayload {
+  url: string;
+  method?: 'get' | 'post' | 'put' | 'delete';
+  data?: any;
+  initActionType?: ACTION_TYPES;
+  successActionType?: ACTION_TYPES;
+  failedActionType?: ACTION_TYPES;
+}
+
+/************************
+/* Middleware
+/***********************/
+export const axiosMiddleware: Middleware = ({ dispatch }) => (next) => (action: AnyAction) => {
+  if (action.type === ACTION_TYPES.AXIOS_ACTION) {
+    fetchData(dispatch, action.payload);
+  }
+
+  return next(action);
+};
+
+function fetchData(dispatch: Dispatch, payload: AxiosMiddlewareActionPayload) {
+  const {
+    data,
+    method = 'get',
+    url,
+    initActionType,
+    successActionType,
+    failedActionType,
+  } = payload;
+
+  // dispatch an action indicating a pending API call
+  if(initActionType){
+    dispatch({
+      type: initActionType,
+    });
+  }
+
+  // we need to make the call and then dispatch the correct action types
+  const requestParams = {
+    data,
+    method,
+    url,
+  };
+
+  axios.request(requestParams).then((response: AxiosResponse) => {
+    if(successActionType){
+      dispatch({
+        type: successActionType,
+        payload: response.data,
+      });
+    }
+  }, (error: any) => {
+    // additional logging here
+    if(failedActionType){
+      dispatch({
+        type: failedActionType,
+        payload: {
+          data,
+          error,
+        }
+      });
+    }
+  });
+}
+
+/************************
+/* Action creator
+/***********************/
+export interface AxiosMiddlewareAction {
+  type: ACTION_TYPES.AXIOS_ACTION;
+  payload: AxiosMiddlewareActionPayload;
+}
+
+export function createAxiosAction(payload: AxiosMiddlewareActionPayload): AxiosMiddlewareAction {
+  return {
+    type: ACTION_TYPES.AXIOS_ACTION,
+    payload,
+  };
+}
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h5>Action creator</h5>
+          <pre>
+            <code>import { createAxiosAction } from 'common/axiosMiddleware';
+import ACTION_TYPES from './actionTypes';
+
+function createUser(data: User) {
+  return createAxiosAction({
+    data,
+    method: 'post',
+    url: '/api/user',
+    initActionType: ACTION_TYPES.USER_CREATE_INIT,
+    successActionType: ACTION_TYPES.USER_CREATE_SUCCESS,
+    failedActionType: ACTION_TYPES.USER_CREATE_ERROR,
+  });
+}
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h5>Reducer</h5>
+          <pre>
+            <code>import ACTION_TYPES from './actionTypes';
+
+...
+
+function reducer(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ACTION_TYPES.USER_CREATE_INIT:
+      return {
+        ...state,
+        loading: true,
+      };
+
+    case ACTION_TYPES.USER_CREATE_SUCCESS:
+      return {
+        ...state,
+        users: [...state.users].push(action.payload),
+        loading: false,
+      };
+      
+    case ACTION_TYPES.USER_CREATE_ERROR:
+      return {
+        ...state,
+        error: action.payload.error,
+        loading: false,
+      };
+    default:
+      return state;
+  }
+}
+            </code>
+          </pre>
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
+</html>
