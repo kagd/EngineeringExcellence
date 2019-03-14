@@ -148,8 +148,7 @@ body {
   font-size: 0.55em;
   font-family: monospace;
   line-height: 1.2em;
-  word-wrap: break-word;
-  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3); }
+	word-wrap: break-word; }
 
 .reveal code {
   font-family: monospace;
@@ -232,13 +231,6 @@ body {
   background: rgba(255, 255, 255, 0.12);
   border: 4px solid #fff;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
-	
-.reveal section img.vs {
-	background: none;
-	border: none;
-	box-shadow: none;
-	max-height: 100px;
-}
 
 .reveal section img.plain {
   border: 0;

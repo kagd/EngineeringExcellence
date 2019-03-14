@@ -6,11 +6,13 @@
 
     <title>reveal.js</title>
 
-    <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="../../css/reveal.css">
+    <link rel="stylesheet" href="../../css/theme/league.css">
 
     <!-- Theme used for syntax highlighting of code -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
+		<link rel="stylesheet" href="../../lib/css/monokai.css">
+		<!-- Customizations -->
+		<link rel="stylesheet" href="../../css/custom.css">
 
     <!-- Printing and PDF exports -->
     <script>
@@ -25,14 +27,19 @@
     <div class="reveal">
       <div class="slides">
         <section>
-          <h2>Redux Saga <div><img class="vs" src="./img/vs.png" alt="versus"></div> Redux Middleware</h2>
+          <h2>Redux Saga <div><img class="plain" style="height: 100px;" src="./vs.png" alt="versus"></div> Redux Middleware</h2>
         </section>
         <section>
           <h3>Problems with Sagas</h3>
           <ul>
-            <li>New saga for each API that is attached to AJAX</li>
-            <li>Sagas are difficult to test w/o testing internals</li>
-            <li>Many devs are not familiar with generators</li>
+            <li class="fragment">
+                New saga for each API that is attached to AJAX
+                <ul class="fragment">
+                  <li>This also means that you have to update the root saga as well</li>
+                </ul>
+            </li>
+            <li class="fragment">Sagas are difficult to test w/o testing internals</li>
+            <li class="fragment">Many devs are not familiar with generators</li>
           </ul>
         </section>
         <section>
@@ -46,13 +53,18 @@
         <section>
           <h3>Benefits of a custom middleware</h3>
           <ul>
-            <li>Doesn't have to be created for each new endpoint</li>
-            <li>Can be shared between microsites</li>
-            <li>Simple to test since it's just a function.</li>
+            <li class="fragment">
+              Doesn't have to be created for each new endpoint
+              <ul class="fragment">
+                <li>Just create an action creator which you are already creating with redux-saga</li>
+              </ul>
+            </li>
+            <li class="fragment">Can be shared between microsites</li>
+            <li class="fragment">Simple to test since it's just a function.</li>
           </ul>
         </section>
         <section>
-          <h2>How would that look</h2>
+          <h2>How would that look?</h2>
         </section>
         <section>
           <h5>Middleware</h5>
@@ -99,6 +111,9 @@ function fetchData(dispatch: Dispatch, payload: AxiosMiddlewareActionPayload) {
   if(initActionType){
     dispatch({
       type: initActionType,
+      payload: {
+        requestData: data,
+      }
     });
   }
 
@@ -113,7 +128,10 @@ function fetchData(dispatch: Dispatch, payload: AxiosMiddlewareActionPayload) {
     if(successActionType){
       dispatch({
         type: successActionType,
-        payload: response.data,
+        payload: {
+          requestData: data,
+          response: response.data,
+        }
       });
     }
   }, (error: any) => {
@@ -122,7 +140,7 @@ function fetchData(dispatch: Dispatch, payload: AxiosMiddlewareActionPayload) {
       dispatch({
         type: failedActionType,
         payload: {
-          data,
+          requestData: data,
           error,
         }
       });
@@ -170,7 +188,7 @@ function createUser(data: User) {
         <section>
           <h5>Reducer</h5>
           <pre>
-            <code>import ACTION_TYPES from './actionTypes';
+            <code class="js">import ACTION_TYPES from './actionTypes';
 
 ...
 
@@ -201,12 +219,16 @@ function reducer(state: State = initialState, action: Action): State {
 }
             </code>
           </pre>
-        </section>
+				</section>
+				
+				<section>
+					<h3>Thoughts?</h3>
+				</section>
       </div>
     </div>
 
-    <script src="lib/js/head.min.js"></script>
-    <script src="js/reveal.js"></script>
+    <script src="../../lib/js/head.min.js"></script>
+    <script src="../../js/reveal.js"></script>
 
     <script>
       // More info about config & dependencies:
@@ -214,10 +236,10 @@ function reducer(state: State = initialState, action: Action): State {
       // - https://github.com/hakimel/reveal.js#dependencies
       Reveal.initialize({
         dependencies: [
-          { src: 'plugin/markdown/marked.js' },
-          { src: 'plugin/markdown/markdown.js' },
-          { src: 'plugin/notes/notes.js', async: true },
-          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+          { src: '../../plugin/markdown/marked.js' },
+          { src: '../../plugin/markdown/markdown.js' },
+          { src: '../../plugin/notes/notes.js', async: true },
+          { src: '../../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
         ]
       });
     </script>

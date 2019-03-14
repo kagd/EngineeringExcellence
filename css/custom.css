@@ -1,0 +1,6 @@
+.reveal section img.plain {
+	background: none;  
+}
+.reveal pre {
+	box-shadow: none;
+}
