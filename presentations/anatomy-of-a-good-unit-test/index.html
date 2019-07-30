@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Anatomy of a Good Unit Test</title>
+
+    <link rel="stylesheet" href="../../css/reveal.css">
+    <link rel="stylesheet" href="../../css/theme/league.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="../../lib/css/monokai.css">
+		<!-- Customizations -->
+		<link rel="stylesheet" href="../../css/custom.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Anatomy of a Good Unit Test</h2>
+        </section>
+
+        <section>
+          <h3>Why do we test?</h3>
+          <ul>
+            <li class="fragment">
+              Because I was told to!
+            </li>
+            <li class="fragment">
+              I need code coverage to pass the DevOps gateway.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Seriously though, why do we test?</h3>
+          <ul>
+            <li class="fragment">
+              To ensure we get an expected result given a set of parameters
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>That means tests...</h3>
+          <section>
+            <h5>Should be reproducible</h5>
+            <hr />
+            <p>It shouldn't matter how many times a test is run, you should get the same result each run, given the params stay the same.</p>
+          </section>
+          <section>
+            <h5>Should care only about the result, not internals</h5>
+            <hr />
+            <ul>
+              <li>The internals of a method can be refactored without breaking the test.</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h3>Test names</h3>
+          <ul>
+            <li>Be as specific as needed to convey the expected behavior. More specifically, what happens and when it happens</li>
+            <li>I shouldn't have to scan the test itself to know what the assertion is</li>
+            <li>Names like "it works" and "it handles click" don't convey a what and when</li>
+            <li>"it does x when y", "it renders x on click", "it loads data on mount" are more descriptive. I don't have to scan the test to know what happens.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Single assertions</h3>
+          <ul>
+            <li>Guideline: Only verify 1 thing per test</li>
+            <li>There are exceptions, but this is a very good guide</li>
+          </ul>
+          <p>
+            Potential exceptions: shape of return value
+          </p>
+        </section>
+
+        <section>
+          <section>
+            <h3>Before/After Each</h3>
+            <p>
+              Room for argument here, but I believe that being explicit per test on what is being setup
+              is more helpful than brevity. I want to know exactly what this test needs to perform
+              and execute as expected.
+            </p>
+          </section>
+          <section>
+            <h3>Question for you</h3>
+          </section>
+          <section>
+            <h5>Is there anything setup in this test prior to execution?</h5>
+            <pre>
+              <code class="js" data-trim>
+it('returns the search', () => {
+  expect(urlHelpers.urlHashToFormValues().search).toBe('foo');
+});
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h5>How about this one?</h5>
+            <pre>
+              <code class="js" data-trim>
+it('returns the search', () => {
+  setHashUrl('?search=foo');
+  expect(urlHelpers.urlHashToFormValues().search).toBe('foo');
+});
+              </code>
+            </pre>
+          </section>
+          <section>
+            <p>
+              <strong>Q:</strong> When you have a failing unit test, what is the first thing you look at?
+            </p>
+            <p class="fragment">
+              <strong>A:</strong> The failing test
+            </p>
+          </section>
+          <section>
+            <p>
+              It is at that point you have to scroll up to find the beforeEach to see if
+              it's doing anything. Wouldn't it be easier to see a method being called to know something is
+              happening?
+            </p>
+            <p>
+              When you have a small test suite, using beforeEach is usually not overlooked. However, when your suite starts to become large,
+              beforeEach can easily be overlooked.
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <h3>DRY vs. Verbose</h3>
+          <p>Discussion...</p>
+        </section>
+
+        <section>
+          <section>
+            <h3>Example</h3>
+            <p>Switching from internal state to Redux.</p>
+          </section>
+          <section>
+            <h5>Internal state</h5>
+            <pre class="stretch">
+              <code class="jsx" data-trim>
+export default class Comp extends React.Component(){
+  state = {
+    modalOpen: false,
+  };
+
+  toggleOpen = () => {
+    this.setState({modalOpen: !this.state.modalOpen});
+  }
+
+  render(){
+    if(this.state.modalOpen){
+      return <div id="modal">Modal here</div>
+    }
+    return <button onClick={this.toggleOpen}>Click me</button>
+  }
+}
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Successful unit test</h3>
+            <pre>
+              <code class="jsx" data-trim>
+const wrapper = mount(<Comp></Comp>);
+const instance = wrapper.instance();
+instance.toggleOpen();
+expect(instance.state.modalOpen).toEqual(false);
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h5>We refactor it to use Redux instead</h5>
+            <pre class="stretch">
+              <code class="jsx" data-trim>
+function Comp(props){
+  if(props.modalOpen){
+    return <div id="modal">Modal here</div>
+  }
+  return <button onClick={props.toggleOpen}>Click me</button>
+}
+
+const mapStateToProps(state) {
+  return {
+    modalOpen: state.modal.modalOpen,
+  };
+}
+
+const mapDispatchToProps = {
+  toggleOpen
+}
+
+export default connect(mapStateToProps)(Comp);
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Now our unit tests break</h3>
+            <p>However we have a simple solution</p>
+          </section>
+          <section>
+            <h5>Simulate user interaction instead</h5>
+            <pre>
+              <code data-trim>
+const wrapper.find('button').simulate('click');
+expect(wrapper.exists('#modal')).toBe(true);
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <h3>But what about functions that return `void`?</h3>
+          <ul>
+            <li>You can still test that the other function/method is called</li>
+            <li>You could argue that this is testing internals</li>
+            <li>Ask yourself "is there a better test that asserts against output instead?"</li>
+            <li>When unit test become too granular, they can get brittle. The opposite is also true, e2e tests are larger, but can be very brittle.</li>
+            <li>Find that sweet spot</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Examples of poor</h3>
+          // TODO try to find real world examples, maybe from CHR
+          <section>
+            // external ajax call
+          </section>
+          <section>
+            // internal state
+          </section>
+          <section>
+            // spy on internal method
+          </section>
+          <section>
+            // connected redux
+          </section>
+        </section>
+
+        <section>
+          <h3>Examples of good</h3>
+          // TODO
+        </section>
+				
+				<section>
+					<h3>Thoughts?</h3>
+        </section>
+        
+        <section>
+          <h3>References</h3>
+          <li>
+            https://codebork.com/2016/12/07/anatomy-of-a-unit-test.html
+          </li>
+        </section>
+      </div>
+    </div>
+
+    <script src="../../lib/js/head.min.js"></script>
+    <script src="../../js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '../../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
+</html>
