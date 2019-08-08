@@ -22,12 +22,35 @@
       link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
       document.getElementsByTagName( 'head' )[0].appendChild( link );
     </script>
+    <style>
+      .good {
+        color: green;
+        display: inline-block;
+        left: -50px;
+        position: relative;
+        transform: rotate(-23deg);
+        top: -70px;
+        white-space: nowrap;
+        width: 20px;
+      }
+
+      .good::after {
+        content: '<';
+        display: block;
+        position: absolute;
+        transform: rotate(-79deg);
+        top: 77px;
+        font-size: 55px;
+        left: 25px;
+        color: green;
+      }
+    </style>
   </head>
   <body>
     <div class="reveal">
       <div class="slides">
         <section>
-          <h2>Anatomy of a Good Unit Test</h2>
+          <h2>Anatomy of a <span class="good">Good</span> Unit Test</h2>
         </section>
 
         <section>
