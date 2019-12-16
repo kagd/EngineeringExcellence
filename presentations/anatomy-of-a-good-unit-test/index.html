@@ -192,33 +192,7 @@ it('renders a the warning message'){ // poor title
               <li>But it only tests that rendering the component doesn't throw an error.</li>
             </ul>
           </section>
-	  <section>
-            <h4>A C# Example</h4>
-	    <pre class="stretch">
-	      <code class="cs" data-trim>
-[TestMethod]
-[TestCategory("Unit Tests")]
-public void GetRelatedLocation_GetsLocation()
-{
-    // Arrange
-    _locationsRepository
-	.Setup(r => r.CreateSupplierLocation(It.IsAny<User>(),
-	    It.IsAny<Location>(), It.IsAny<int>()))
-	.Returns(new LocationSummary());
-
-    // Act
-    var result = _locationsManager.GetRelatedLocation(1, "e", "e");
-
-    // Assert
-    result.Should().NotBeNull();
-}
-	      </code>
-	    </pre>
-            <ul>
-              <li>This test will give you 100% coverage</li>
-              <li>And correctly assert that the result is not null, but what is being asserted?</li>
-            </ul>
-	  </section>
+	        
           <section>
             <h4>Good Unit Test(s)</h4>
             <pre class="stretch">
@@ -240,6 +214,32 @@ it('renders does not render a warning message if warning is falsy'){
 }
               </code>
             </pre>
+          </section>
+
+          <section>
+            <h4>A C# Example</h4>
+            <pre class="stretch">
+              <code class="cs" data-trim>
+[TestMethod]
+[TestCategory("Unit Tests")]
+public void GetRelatedLocation_GetsLocation()
+{
+    // Arrange
+    _locationsRepository
+	.Setup(r => r.CreateSupplierLocation(It.IsAny<&lt;User>(),
+	    It.IsAny&lt;Location>(), It.IsAny&lt;int>()))
+	.Returns(new LocationSummary());
+
+    // Act
+    var result = _locationsManager.GetRelatedLocation(1, "e", "e");
+
+    // Assert
+    result.Should().NotBeNull();
+}
+              </code>
+            </pre>
+            <p>Again 100% coverage, but nothing of value being tested</p>
+	        </section>
         </section>
 
         <section>
