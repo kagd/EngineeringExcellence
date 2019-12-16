@@ -54,12 +54,23 @@
         </section>
 
         <section>
+          <h3>What we will cover</h3>
+          <ul>
+            <li><a href="#/why-we-test">Why we test</a></li>
+            <li><a href="#/test-naming">Test naming</a></li>
+            <li><a href="#/code-coverage">CodeCoverage.OneHundred != Test.Good</a></li>
+            <li><a href="#/before-after-each">Dry vs. Verbose (beforeEach / afterEach)</a></li>
+            <li><a href="#/brittle">How to refactor tests to be less brittle</a></li>
+          </ul>
+        </section>
+
+        <section id="why-we-test">
           <h3>Why do we test?</h3>
           <ul>
-            <li class="fragment">
+            <li>
               Because I was told to!
             </li>
-            <li class="fragment">
+            <li>
               I need code coverage to pass the DevOps gateway.
             </li>
           </ul>
@@ -68,8 +79,8 @@
         <section>
           <h3>Seriously though, why do we test?</h3>
           <ul>
-            <li class="fragment">
-              To ensure we get an expected result given a set of parameters
+            <li>
+              To ensure we get an expected result given a specific set of parameters
             </li>
           </ul>
         </section>
@@ -79,71 +90,162 @@
           <section>
             <h5>Should be reproducible</h5>
             <hr />
-            <p>It shouldn't matter how many times a test is run, you should get the same result each run, given the params stay the same.</p>
+            <p>It shouldn't matter how many times a test is run, you should get the same result each run, given the parameters stay the same.</p>
           </section>
           <section>
-            <h5>Should care only about the result, not internals</h5>
+            <h5>Should care only about the result</h5>
             <hr />
             <ul>
-              <li>The internals of a method can be refactored without breaking the test.</li>
+              <li>Testing internals mean that tests are more likely to fail when the function is changed.</li>
             </ul>
           </section>
         </section>
 
-        <section>
-          <h3>Test names</h3>
-          <ul>
-            <li>Be as specific as needed to convey the expected behavior. More specifically, what happens and when it happens</li>
-            <li>I shouldn't have to scan the test itself to know what the assertion is</li>
-            <li>Names like "it works" and "it handles click" don't convey a what and when</li>
-            <li>"it does x when y", "it renders x on click", "it loads data on mount" are more descriptive. I don't have to scan the test to know what happens.</li>
-          </ul>
+        <section id="test-naming">
+          <section>
+            <h3>Test names</h3>
+            <ul>
+              <li>Be specific!</li>
+              <li>What happens and when does it happen?</li>
+              <li>Shouldn't require scanning the test to know what the assertion is.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4>Poor test names</h4>
+            <ul>
+              <li>it works</li>
+              <li>fetchData</li>
+              <li>it handles click</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4>Better test names</h4>
+            <ul>
+              <li>it renders a modal when the link is clicked</li>
+              <li>it fetches orders on mount</li>
+              <li>returns an error when name is not present</li>
+            </ul>
+          </section>
+        </section>
+
+        <section id="code-coverage">
+          <section>
+            <h3>CodeCoverage.OneHundred != Test.Good</h3>
+          </section>
+
+          <section>
+            <h3>Tests</h3>
+            <p>Ensure things are functioning as expected.</p>
+          </section>
+
+          <section>
+            <h3>Code coverage</h3>
+            <ul>
+              <li>Tells you if a particular branch/statement/function has been hit during testing.</li>
+              <li>Does NOT ensure the particular branch/statement/function is behaving as expected.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4>Example</h4>
+            <pre class="stretch">
+              <code class="js" data-trim>
+export default class Modal extends React.Component(){
+  warningMessage(){
+    return (
+      <div class="warning" data-test="warning">
+        Warning: ${this.props.warning}
+      </div>
+    )
+  }
+
+  render(){
+    return (
+      <div id="modal">
+        <button onClick={props.closeModal}>Close</button>
+        {props.warning !== null && this.warningMessage()}
+        <p>Modal here</p>
+      </div>
+    );
+  }
+}
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h4>Code Coverage Unit Test</h4>
+            <pre>
+              <code class="js" data-trim>
+it('renders a the warning message'){ // poor title
+  const wrapper = shallow(
+    <Modal warning="This is a code coverage example"></Modal>
+  );
+  expect(wrapper.find('#modal')).hasLength(1);
+}
+              </code>
+            </pre>
+            <ul>
+              <li>This test will give you 100% coverage</li>
+              <li>But it only tests that rendering the component doesn't throw an error.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h4>Good Unit Test(s)</h4>
+            <pre class="stretch">
+              <code class="js" data-trim>
+it('renders a the warning message'){
+  const wrapper = shallow(
+    <Modal warning="This is a code coverage example"></Modal>
+  );
+  expect(wrapper.find('[data-test="warning"]')).hasLength(1);
+}
+
+// The inverse ensures warning is only being rendered when the warning
+// prop is supplied
+it('renders does not render a warning message if warning is falsy'){
+  const wrapper = shallow(
+    <Modal></Modal>
+  );
+  expect(wrapper.find('[data-test="warning"]')).hasLength(0);
+}
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <ul>
+              <li>These tests will give you 100% coverage</li>
+              <li>And correctly assert when <em>[data-test="warning"]</em> is displayed</li>
+            </ul>
+          </section>
         </section>
 
         <section>
           <h3>Single assertions</h3>
           <ul>
             <li>Guideline: Only verify 1 thing per test</li>
-            <li>There are exceptions, but this is a very good guide</li>
+            <li>Less brittle because they are limited in scope</li>
+            <li>Do I care that a previous assertion failure ignores the next assertion?</li>
           </ul>
           <p>
-            Potential exceptions: shape of return value
+            Potential exception: shape of return value
           </p>
         </section>
 
-        <section>
+        <section id="before-after-each">
           <section>
             <h3>Before/After Each</h3>
             <p>
               Room for argument here, but I believe that being explicit per test on what is being setup
-              is more helpful than brevity. I want to know exactly what this test needs to perform
+              is more helpful than DRY. I want to know exactly what this test needs to perform
               and execute as expected.
             </p>
           </section>
-          <section>
-            <h3>Question for you</h3>
-          </section>
-          <section>
-            <h5>Is there anything setup in this test prior to execution?</h5>
-            <pre>
-              <code class="js" data-trim>
-it('returns the search', () => {
-  expect(urlHelpers.urlHashToFormValues().search).toBe('foo');
-});
-              </code>
-            </pre>
-          </section>
-          <section>
-            <h5>How about this one?</h5>
-            <pre>
-              <code class="js" data-trim>
-it('returns the search', () => {
-  setHashUrl('?search=foo');
-  expect(urlHelpers.urlHashToFormValues().search).toBe('foo');
-});
-              </code>
-            </pre>
-          </section>
+          
           <section>
             <p>
               <strong>Q:</strong> When you have a failing unit test, what is the first thing you look at?
@@ -152,31 +254,43 @@ it('returns the search', () => {
               <strong>A:</strong> The failing test
             </p>
           </section>
+          
           <section>
-            <p>
-              It is at that point you have to scroll up to find the beforeEach to see if
-              it's doing anything. Wouldn't it be easier to see a method being called to know something is
-              happening?
-            </p>
-            <p>
-              When you have a small test suite, using beforeEach is usually not overlooked. However, when your suite starts to become large,
-              beforeEach can easily be overlooked.
-            </p>
+            <ul>
+              <li>So if the first thing that we look at is the failing test, why not setup everything for that test, in the test?</li>
+              <li>
+                When you have a small test suite, using beforeEach is usually not overlooked. However, when your suite starts to become large,
+                beforeEach can easily be overlooked.
+              </li>
+              <li>
+                More important ins JS than C# because of global shared state.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>DRY vs. Verbose</h3>
+            <p>Discussion...</p>
           </section>
         </section>
 
-        <section>
-          <h3>DRY vs. Verbose</h3>
-          <p>Discussion...</p>
-        </section>
-
-        <section>
+        <section id="brittle">
           <section>
-            <h3>Example</h3>
-            <p>Switching from internal state to Redux.</p>
+            <h3>How to refactor tests to be less brittle</h3>
           </section>
+
           <section>
-            <h5>Internal state</h5>
+            <h4>Questions to ask</h4>
+            <p>What is the expected outcome?</p>
+            <p>Can this function/component be refactored without the test breaking?</p>
+          </section>
+
+          <section>
+            <h4>Example</h4>
+            <p>Assertion: When the link is clicked, a modal is shown</p>
+          </section>
+
+          <section>
             <pre class="stretch">
               <code class="jsx" data-trim>
 export default class Comp extends React.Component(){
@@ -184,66 +298,108 @@ export default class Comp extends React.Component(){
     modalOpen: false,
   };
 
-  toggleOpen = () => {
+  closeModel = () => {
+    this.setState({modalOpen: false});
+  }
+
+  openModel = () => {
+    this.setState({modalOpen: true});
+  }
+
+  render(){
+    if(this.state.modalOpen){
+      return (
+        <div id="modal">
+          <button onClick={this.toggleModel}>Close</button>
+          <p>Modal here</p>
+        </div>
+      );
+    }
+    return <a onClick={this.openModel}>Click me</a>
+  }
+}
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Internal state unit test</h3>
+            <pre>
+              <code class="jsx" data-trim>
+const wrapper = mount(<Comp></Comp>);
+const instance = wrapper.instance();
+instance.toggleOpen(); // internal component method
+expect(instance.state.modalOpen).toEqual(false);
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <p>
+              But now we want to refactor this component to DRY it up.
+            </p>
+          </section>
+
+          <section>
+            <pre>
+              <code class="jsx" data-trim>
+// From this
+closeModel = () => {
+  this.setState({modalOpen: false});
+}
+
+openModel = () => {
+  this.setState({modalOpen: true});
+}
+
+// To this
+toggleModel = () => {
+  this.setState({modalOpen: !this.state.modalOpen});
+}
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <p>Doing this will break the existing test.</p>
+            <p>But there's a simple solution.</p>
+          </section>
+
+          <section>
+            <h5>Simulate user interaction instead</h5>
+            <pre>
+              <code data-trim>
+const wrapper = mount(<Comp></Comp>);
+wrapper.find('button').simulate('click');
+expect(wrapper.exists('#modal')).toBe(true);
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h5>Now we can refactor without test breakage</h5>
+            <pre class="stretch">
+              <code class="jsx" data-trim>
+export default class Comp extends React.Component(){
+  state = {
+    modalOpen: false,
+  };
+
+  toggleModel = () => {
     this.setState({modalOpen: !this.state.modalOpen});
   }
 
   render(){
     if(this.state.modalOpen){
-      return <div id="modal">Modal here</div>
+      return (
+        <div id="modal">
+          <button onClick={this.toggleModel}>Close</button>
+          <p>Modal here</p>
+        </div>
+      );
     }
-    return <button onClick={this.toggleOpen}>Click me</button>
+    return <a onClick={this.toggleModel}>Click me</a>
   }
 }
-              </code>
-            </pre>
-          </section>
-          <section>
-            <h3>Successful unit test</h3>
-            <pre>
-              <code class="jsx" data-trim>
-const wrapper = mount(<Comp></Comp>);
-const instance = wrapper.instance();
-instance.toggleOpen();
-expect(instance.state.modalOpen).toEqual(false);
-              </code>
-            </pre>
-          </section>
-          <section>
-            <h5>We refactor it to use Redux instead</h5>
-            <pre class="stretch">
-              <code class="jsx" data-trim>
-function Comp(props){
-  if(props.modalOpen){
-    return <div id="modal">Modal here</div>
-  }
-  return <button onClick={props.toggleOpen}>Click me</button>
-}
-
-const mapStateToProps(state) {
-  return {
-    modalOpen: state.modal.modalOpen,
-  };
-}
-
-const mapDispatchToProps = {
-  toggleOpen
-}
-
-export default connect(mapStateToProps)(Comp);
-              </code>
-            </pre>
-          </section>
-          <section>
-            <h3>Now our unit tests break</h3>
-            <p>However we have a simple solution</p>
-          </section>
-          <section>
-            <h5>Simulate user interaction instead</h5>
-            <pre>
-              <code data-trim>
-const wrapper.find('button').simulate('click');
-expect(wrapper.exists('#modal')).toBe(true);
               </code>
             </pre>
           </section>
@@ -258,28 +414,6 @@ expect(wrapper.exists('#modal')).toBe(true);
             <li>When unit test become too granular, they can get brittle. The opposite is also true, e2e tests are larger, but can be very brittle.</li>
             <li>Find that sweet spot</li>
           </ul>
-        </section>
-
-        <section>
-          <h3>Examples of poor</h3>
-          // TODO try to find real world examples, maybe from CHR
-          <section>
-            // external ajax call
-          </section>
-          <section>
-            // internal state
-          </section>
-          <section>
-            // spy on internal method
-          </section>
-          <section>
-            // connected redux
-          </section>
-        </section>
-
-        <section>
-          <h3>Examples of good</h3>
-          // TODO
         </section>
 				
 				<section>
