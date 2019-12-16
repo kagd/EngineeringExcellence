@@ -202,7 +202,8 @@ public void GetRelatedLocation_GetsLocation()
 {
     // Arrange
     _locationsRepository
-	.Setup(r => r.GetRelatedLocation(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
+	.Setup(r => r.CreateSupplierLocation(It.IsAny<User>(),
+	    It.IsAny<Location>(), It.IsAny<int>()))
 	.Returns(new LocationSummary());
 
     // Act
