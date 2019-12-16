@@ -215,31 +215,6 @@ it('renders does not render a warning message if warning is falsy'){
               </code>
             </pre>
           </section>
-
-          <section>
-            <h4>A C# Example</h4>
-            <pre class="stretch">
-              <code class="cs" data-trim>
-[TestMethod]
-[TestCategory("Unit Tests")]
-public void GetRelatedLocation_GetsLocation()
-{
-    // Arrange
-    _locationsRepository
-	.Setup(r => r.CreateSupplierLocation(It.IsAny<&lt;User>(),
-	    It.IsAny&lt;Location>(), It.IsAny&lt;int>()))
-	.Returns(new LocationSummary());
-
-    // Act
-    var result = _locationsManager.GetRelatedLocation(1, "e", "e");
-
-    // Assert
-    result.Should().NotBeNull();
-}
-              </code>
-            </pre>
-            <p>Again 100% coverage, but nothing of value being tested</p>
-	        </section>
         </section>
 
         <section>
