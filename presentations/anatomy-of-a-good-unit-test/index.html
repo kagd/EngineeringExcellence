@@ -193,6 +193,7 @@ it('renders a the warning message'){ // poor title
             </ul>
           </section>
 	  <section>
+            <h4>C# Example</h4>
 	    <pre class="stretch">
 	      <code class="cs" data-trim>
 [TestMethod]
@@ -201,7 +202,7 @@ public void GetRelatedLocation_GetsLocation()
 {
     // Arrange
     _locationsRepository
-	.Setup(r => r.GetRelatedLocation(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
+	.Setup(r => r.GetRelatedLocation(It.IsAny\<int\>(), It.IsAny\<string\>(), It.IsAny\<string\>()))
 	.Returns(new LocationSummary());
 
     // Act
