@@ -192,7 +192,27 @@ it('renders a the warning message'){ // poor title
               <li>But it only tests that rendering the component doesn't throw an error.</li>
             </ul>
           </section>
+	  <section>
+	    <pre class="stretch">
+	      <code class="cs" data-trim>
+[TestMethod]
+[TestCategory("Unit Tests")]
+public void GetRelatedLocation_GetsLocation()
+{
+    // Arrange
+    _locationsRepository
+	.Setup(r => r.GetRelatedLocation(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
+	.Returns(new LocationSummary());
 
+    // Act
+    var result = _locationsManager.GetRelatedLocation(1, "e", "e");
+
+    // Assert
+    result.Should().NotBeNull();
+}
+	      </code>
+	    </pre>
+	  </section>
           <section>
             <h4>Good Unit Test(s)</h4>
             <pre class="stretch">
