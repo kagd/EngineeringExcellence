@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>What is Docker?</title>
+
+    <link rel="stylesheet" href="../../css/reveal.css">
+    <link rel="stylesheet" href="../../css/theme/league.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="../../lib/css/monokai.css">
+    <!-- Customizations -->
+    <link rel="stylesheet" href="../../css/custom.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>What is Docker?</h2>
+        </section>
+        
+        <section>
+          <h3>OS-level virtualization</h3>
+          <h3>to deliver software in packages called</h3>
+          <h3>containers</h3>
+        </section>
+
+        <section>
+          <h3>Images and Containers</h3>
+        </section>
+
+        <section>
+          <h3>Images</h3>
+          <ul>
+            <li>A Docker image is a read-only template used to build containers.</li>
+            <li>Images are used to store and ship applications.</li>
+            <li>Images are created from a list of commands located in a Dockerfile, usually located alongside the application.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Containers</h3>
+          <ul>
+            <li>Containers are basically a running image</li>
+            <li>Containers can be run on Linux, MacOs, and Windows, with the exception of Windows containers which can only be run on Windows.</li>
+            <li>Containers run the same way, regardless of OS</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Dockerfile</h3>
+          
+          <p>Blueprints of how to build an image</p>
+        </section>
+
+        <section>
+          <h4>Dockerfile for each Online UI</h4>
+          <pre>
+            <code>FROM node:lts-alpine AS BUILD_IMAGE
+WORKDIR /usr/src/app
+COPY . .
+RUN npm ci
+RUN npm run build
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+RUN rm -rf ./*
+COPY --from=BUILD_IMAGE /usr/src/app/build .
+CMD ["nginx", "-g", "daemon off;"]
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h4>Run when building the image</h4>
+          <pre>
+            <code>FROM node:lts-alpine AS BUILD_IMAGE
+WORKDIR /usr/src/app
+COPY . .
+RUN npm ci
+RUN npm run build
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+RUN rm -rf ./*
+COPY --from=BUILD_IMAGE /usr/src/app/build .
+            </code>
+          </pre>
+
+          <p>Notice that the final <code>CMD</code> is missing.</p>
+        </section>
+
+        <section>
+          This is run when the container starts
+          <pre>
+            <code>
+              CMD ["nginx", "-g", "daemon off;"]
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h4>Breaking down the Dockerfile</h4>
+          <pre>
+            <code># we need to compile the UI using node, so let's grab
+# the node image and set it to a variable
+FROM node:lts-alpine AS BUILD_IMAGE
+# set the current working directory
+WORKDIR /usr/src/app
+# Copy all files from the directory of the Dockerfile
+# to the WORKDIR
+COPY . .
+# Install NPM deps
+RUN npm ci
+# Create a production build of the UI
+RUN npm run build
+# Change which image to use, Nginx in this case
+FROM nginx:alpine
+# set the current working directory
+WORKDIR /usr/share/nginx/html
+# remove existing files in WORKDIR
+RUN rm -rf ./*
+# copy built UI files from our Node image to WORKDIR
+COPY --from=BUILD_IMAGE /usr/src/app/build .
+# start Nginx - This is run on container start, not
+# during compilation
+CMD ["nginx", "-g", "daemon off;"]
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Create an image</h3>
+          <pre>
+            <code>docker build -t orders-ui:test</code>
+          </pre>
+
+          <p>nameOfContainer:tagOrVersion</p>
+          <p>If a tag isn't defined, an obscure one will be created (dazzling_yalow, exciting_feynman, suspicious_jones etc)</p>
+        </section>
+
+        <section>
+          <h3>Create a container</h3>
+          <pre>
+            <code>docker run -p 3000:80 orders-ui:test</code>
+          </pre>
+
+          <p>Mapping ports: 3000 is the host's port, 80 is the container's port</p>
+        </section>
+
+        <section>
+          <h3>How else can I use Docker</h3>
+          <ul>
+            <li>Mapping directories</li>
+            <li>Replacement for installing system services and utilities</li>
+          </ul>
+        </section>
+        
+        <section>
+          <h3>Questions?</h3>
+        </section>
+      </div>
+    </div>
+
+    <script src="../../lib/js/head.min.js"></script>
+    <script src="../../js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '../../plugin/markdown/marked.js' },
+          { src: '../../plugin/markdown/markdown.js' },
+          { src: '../../plugin/notes/notes.js', async: true },
+          { src: '../../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
+</html>
