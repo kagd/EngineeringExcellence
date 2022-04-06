@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>Anatomy of a Good Unit Test</title>
+    <title>Good vs. Bad unit tests (What make a good unit test)</title>
 
     <link rel="stylesheet" href="../../css/reveal.css">
     <link rel="stylesheet" href="../../css/theme/league.css">
@@ -22,35 +22,13 @@
       link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
       document.getElementsByTagName( 'head' )[0].appendChild( link );
     </script>
-    <style>
-      .good {
-        color: green;
-        display: inline-block;
-        left: -50px;
-        position: relative;
-        transform: rotate(-23deg);
-        top: -70px;
-        white-space: nowrap;
-        width: 20px;
-      }
-
-      .good::after {
-        content: '<';
-        display: block;
-        position: absolute;
-        transform: rotate(-79deg);
-        top: 77px;
-        font-size: 55px;
-        left: 25px;
-        color: green;
-      }
-    </style>
   </head>
   <body>
     <div class="reveal">
       <div class="slides">
         <section>
-          <h2>Anatomy of a <span class="good">Good</span> Unit Test</h2>
+          <h2>Good vs. Bad unit tests</h2>
+          <h3>(What make a good unit test)</h3>
         </section>
 
         <section>
@@ -93,17 +71,20 @@
             <p>It shouldn't matter how many times a test is run, you should get the same result each run, given the parameters stay the same.</p>
           </section>
           <section>
-            <h5>Should care only about the result</h5>
+            <h5>Should only care about the result*</h5>
             <hr />
             <ul>
-              <li>Testing internals mean that tests are more likely to fail when the function is changed.</li>
+              <li>Internals can be changed without chaning result</li>
+              <li class="fragment">More prone to breaking</li>
+              <li class="fragment">Changes to function requires a change of the test</li>
             </ul>
+            <small class="fragment">* exception: mocking externals</small>
           </section>
         </section>
 
         <section id="test-naming">
+          <h3>Test names</h3>
           <section>
-            <h3>Test names</h3>
             <ul>
               <li>Be specific!</li>
               <li>What happens and when does it happen?</li>
@@ -112,63 +93,61 @@
           </section>
 
           <section>
-            <h4>Poor test names</h4>
+            <h5>Poor test names</h5>
+            <hr/>
             <ul>
-              <li>it works</li>
+              <li>it renders (TDD may say otherwise)</li>
               <li>fetchData</li>
               <li>it handles click</li>
             </ul>
           </section>
 
           <section>
-            <h4>Better test names</h4>
+            <h5>Better test names</h5>
+            <hr/>
             <ul>
-              <li>it renders a modal when the link is clicked</li>
+              <li>it renders the user's name</li>
               <li>it fetches orders on mount</li>
-              <li>returns an error when name is not present</li>
+              <li>it calls props.save on button click</li>
             </ul>
           </section>
         </section>
 
         <section id="code-coverage">
           <section>
-            <h3>CodeCoverage.OneHundred != Test.Good</h3>
+            <h3>CodeCoverage.OneHundredPercent !== Test.Good</h3>
           </section>
 
           <section>
-            <h3>Tests</h3>
-            <p>Ensure things are functioning as expected.</p>
+            <h5>What code coverage means</h5>
+            <hr/>
+            <p>Tells you if a particular branch/statement/function has been run during testing.</p>
           </section>
 
           <section>
-            <h3>Code coverage</h3>
-            <ul>
-              <li>Tells you if a particular branch/statement/function has been hit during testing.</li>
-              <li>Does NOT ensure the particular branch/statement/function is behaving as expected.</li>
-            </ul>
+            <h5>What code coverage DOES NOT mean</h5>
+            <hr/>
+            <p>Does NOT ensure the particular branch/statement/function is behaving as expected.</p>
+          </section>
+
+          <section>
+            <p>Tests should ensure things are functioning as expected, especially logic.</p>
           </section>
 
           <section>
             <h4>Example</h4>
-            <pre class="stretch">
+            <pre>
               <code class="js" data-trim>
-export default class Modal extends React.Component(){
-  warningMessage(){
-    return (
-      <div class="warning" data-test="warning">
-        Warning: ${this.props.warning}
-      </div>
-    )
-  }
+function Modal(props: Props){
+  const {message, onCloseClick, ...rest} = props;
 
-  render(){
-    return (
-      <div id="modal">
-        <button onClick={props.closeModal}>Close</button>
-        {props.warning !== null && this.warningMessage()}
-        <p>Modal here</p>
+  return (
+    <div id="modal" {...rest}>
+      <button onClick={onCloseClick}>Close</button>
+      <div class="message">
+        ${message}
       </div>
-    );
+    </div>
   }
 }
               </code>
@@ -179,38 +158,38 @@ export default class Modal extends React.Component(){
             <h4>Code Coverage Unit Test</h4>
             <pre>
               <code class="js" data-trim>
-it('renders a the warning message'){ // poor title
-  const wrapper = shallow(
-    <Modal warning="This is a code coverage example"></Modal>
+it('renders'){ // poor title
+  const wrapper = render(
+    <Modal message="message" onCloseClick={...} data-testid="modal"></Modal>
   );
-  expect(wrapper.find('#modal')).hasLength(1);
+  expect(wrapper.queryByTestId('modal').length).toBe(1);
 }
               </code>
             </pre>
             <ul>
               <li>This test will give you 100% coverage</li>
-              <li>But it only tests that rendering the component doesn't throw an error.</li>
+              <li>But it only tests that the component renders</li>
             </ul>
           </section>
 	        
           <section>
-            <h4>Good Unit Test(s)</h4>
-            <pre class="stretch">
+            <h4>Better Unit Test(s)</h4>
+            <pre>
               <code class="js" data-trim>
-it('renders a the warning message'){
-  const wrapper = shallow(
-    <Modal warning="This is a code coverage example"></Modal>
+it('renders props.message'){
+  const wrapper = render(
+    <Modal message="message" onCloseClick={...}></Modal>
   );
-  expect(wrapper.find('[data-test="warning"]')).hasLength(1);
+  expect(wrapper.queryByText('message').length).toBe(1);
 }
 
-// The inverse ensures warning is only being rendered when the warning
-// prop is supplied
-it('renders does not render a warning message if warning is falsy'){
-  const wrapper = shallow(
-    <Modal></Modal>
+it('calls props.onCloseClick on button click'){
+  const spy = jest.fn();
+  const wrapper = render(
+    <Modal message="message" onCloseClick={spy}></Modal>
   );
-  expect(wrapper.find('[data-test="warning"]')).hasLength(0);
+  fireEvent.click(wrapper.queryByText('Close'));
+  expect(spy).toHaveBeenCalled();
 }
               </code>
             </pre>
@@ -233,31 +212,118 @@ it('renders does not render a warning message if warning is falsy'){
           <section>
             <h3>Before/After Each</h3>
             <p>
-              Room for argument here, but I believe that being explicit per test on what is being setup
-              is more helpful than DRY. I want to know exactly what this test needs to perform
-              and execute as expected.
-            </p>
-          </section>
-          
-          <section>
-            <p>
               <strong>Q:</strong> When you have a failing unit test, what is the first thing you look at?
             </p>
             <p class="fragment">
               <strong>A:</strong> The failing test
             </p>
           </section>
-          
+
+          <section>
+            <p>So, if the first thing that we look at is the failing test why not setup everything for that test, in the test?</p>
+            <h3 class="fragment">Because DRY, right?</h3>
+          </section>
+                    
+          <section>
+            <h4>Problems with DRY</h4>
+            <hr>
+            <ul>
+              <li>
+                Before/after each can be overlooked
+                <ul>
+                  <li>Large test suites</li>
+                  <li>Nested <code>describe</code> blocks</li>
+                </ul>
+              </li>
+              <li>Test suite scope pollution/collision</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3>Unpopular opinion</h3>
+            <p>
+              Being explicit in tests is more helpful than being DRY.
+            </p>
+            <span class="fragment" >
+              <h4>Rationale</h4>
+              <hr />
+              <p>I want to know exactly what this test needs to perform
+                and execute as expected without having to look outside the test.</p>
+            </span>
+          </section>
+
+          <section>
+            <h3>Test suite scope pollution</h3>
+            <pre>
+              <code class="js" data-trim>
+describe('UserComponent', function(){
+  let params = {};
+  beforeEach(function(){
+    params = {
+      name: 'Grant',
+      company: 'CHR',
+      onChange: () => {}
+    };
+  });
+
+  it('renders the name', ()=>{
+    ...
+  })
+});
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <p>And then we overwrite the value we need</p>
+            <pre>
+              <code class="js" data-trim>
+describe('UserComponent', function(){
+  it('renders the name', ()=>{
+    params.onChange = jest.fn();
+    ...
+  });
+});
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h3>Potential compromise?</h3>
+            <ul>
+              <li>Explicit</li>
+              <li>DRY(ish)</li>
+            </ul>
+          </section>
+
+          <section>
+            <p>Why not do something like this?</p>
+            <pre>
+              <code class="js" data-trim>
+function createParams(overrides = {}){
+  return {
+    name: 'Grant',
+    company: 'CHR',
+    onChange: () => {},
+    ...overrides
+  }
+}
+
+describe('UserComponent', function(){
+  it('renders the name', ()=>{
+    const params = createParams({onChange: jest.fn()});
+    ...
+  });
+});
+              </code>
+            </pre>
+          </section>
+
           <section>
             <ul>
-              <li>So if the first thing that we look at is the failing test, why not setup everything for that test, in the test?</li>
-              <li>
-                When you have a small test suite, using beforeEach is usually not overlooked. However, when your suite starts to become large,
-                beforeEach can easily be overlooked.
-              </li>
-              <li>
-                More important ins JS than C# because of global shared state.
-              </li>
+              <li>Explicit on values</li>
+              <li>Doesn't pollute the test suite scope</li>
+              <li>Potentially more importantly, explicit on what is under test</li>
             </ul>
           </section>
 
