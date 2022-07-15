@@ -357,11 +357,11 @@ export default class Comp extends React.Component(){
     modalOpen: false,
   };
 
-  closeModel = () => {
+  closeModal = () => {
     this.setState({modalOpen: false});
   }
 
-  openModel = () => {
+  openModal = () => {
     this.setState({modalOpen: true});
   }
 
@@ -369,12 +369,12 @@ export default class Comp extends React.Component(){
     if(this.state.modalOpen){
       return (
         <div id="modal">
-          <button onClick={this.toggleModel}>Close</button>
+          <button onClick={this.closeModal}>Close</button>
           <p>Modal here</p>
         </div>
       );
     }
-    return <a onClick={this.openModel}>Click me</a>
+    return <a onClick={this.openModal}>Click me</a>
   }
 }
               </code>
@@ -386,7 +386,7 @@ export default class Comp extends React.Component(){
               <code class="jsx" data-trim>
 const wrapper = mount(<Comp></Comp>);
 const instance = wrapper.instance();
-instance.toggleOpen(); // internal component method
+instance.openModal(); // internal component method
 expect(instance.state.modalOpen).toEqual(false);
               </code>
             </pre>
@@ -402,16 +402,16 @@ expect(instance.state.modalOpen).toEqual(false);
             <pre>
               <code class="jsx" data-trim>
 // From this
-closeModel = () => {
+closeModal = () => {
   this.setState({modalOpen: false});
 }
 
-openModel = () => {
+openModal = () => {
   this.setState({modalOpen: true});
 }
 
 // To this
-toggleModel = () => {
+toggleModal = () => {
   this.setState({modalOpen: !this.state.modalOpen});
 }
               </code>
@@ -443,7 +443,7 @@ export default class Comp extends React.Component(){
     modalOpen: false,
   };
 
-  toggleModel = () => {
+  toggleModal = () => {
     this.setState({modalOpen: !this.state.modalOpen});
   }
 
@@ -451,12 +451,12 @@ export default class Comp extends React.Component(){
     if(this.state.modalOpen){
       return (
         <div id="modal">
-          <button onClick={this.toggleModel}>Close</button>
+          <button onClick={this.toggleModal}>Close</button>
           <p>Modal here</p>
         </div>
       );
     }
-    return <a onClick={this.toggleModel}>Click me</a>
+    return <a onClick={this.toggleModal}>Click me</a>
   }
 }
               </code>
