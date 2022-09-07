@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Import Maps</title>
+
+    <link rel="stylesheet" href="../../css/reveal.css">
+    <link rel="stylesheet" href="../../css/theme/league.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="../../lib/css/monokai.css">
+		<!-- Customizations -->
+		<link rel="stylesheet" href="../../css/custom.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Import Maps</h2>
+        </section>
+
+        <section>
+          <h3>What we will cover</h3>
+          <ul>
+            <li>What are import maps</li>
+            <li>Why are we using them</li>
+            <li>How to retrieve the latest remote library</li>
+            <li>Shipments.UI Demo</li>
+            <li>Developing locally</li>
+            <li>What's next</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/WICG/import-maps#the-basic-idea" target="_blank">What are import maps</a></h2>
+          <ul>
+            <li>A browser native mechanism to import dependencies at runtime</li>
+            <li>No longer bundle entire UI into a single chunk</li>
+            <li>Local libs and/or remote libs</li>
+            <li>Imports need to be ES modules</li>
+            <li>Shims are available for browsers that don't support all aspects of ES modules yet (Firefox is experimental)</li>
+            <li><a href="https://caniuse.com/import-maps" target="_blank">Browser Support</a></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Why are we using import maps?</h2>
+          <ul>
+            <li>Deploy shared libs across entire platform with a single merge</li>
+            <li>Independent deployment of features delivered by non-Online teams
+              <li>Data Science with Emissions IQ</li>
+            </li>
+            <li>Limit innersourcing agreement duration</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>How to retrieve the latest remote library</h2>
+          <ul>
+            <li><a href="https://np-cdn.chrobinson.com/libs/@chr/online-shared-microsite-core@7" target="_blank">https://np-cdn.chrobinson.com/libs/@chr/online-shared-microsite-core@7</a></li>
+            <li><a href="https://cdn.chrobinson.com/remote-libs/@chr/online-shared-microsite-core/7.0.17/index.es.js" target="_blank">https://cdn.chrobinson.com/remote-libs/@chr/online-shared-microsite-core/7.0.17/index.es.js</a></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Shipments.UI Demo</h2>
+          <p>
+            <a href="https://dev-online.chrobinson.com/shipments/#/detail/102984147" target="_blank">https://dev-online.chrobinson.com/shipments/#/detail/102984147</a>
+          </p>
+        </section>
+
+        <section>
+          <h2>Developing Locally</h2>
+          <h4>Please give a warm welcome to William O'Brien!</h4>
+        </section>
+
+        <section>
+          <h2>What's next?</h2>
+          <ul>
+            <li>Abstraction</li>
+            <li>Rollout to Insight.UI & Documentation</li>
+            <li>
+              Pilot UIs
+              <ul>
+                <li>Documents.UI</li>
+                <li>Tracking.UI</li>
+                <li>Payments.UI</li>
+                <li>NotificationSettings.UI</li>
+                <li>Templates.UI</li>
+                <li>PurchaseOrder.UI</li>
+              </ul>
+            </li>
+            <li>Q4 & Q1 - Rollout to remaining Online UIs</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Import maps was made possible by</h2>
+          <ul>
+            <li>UI Platfor team - Evan Bremer, Pavel Pavlov & William O'Brien</li>
+            <li>Joshua Vedane, Anthony Urbanek and Chris Hince</li>
+            <li>Cloud - Cory Degerstrom and Richard Wagner</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <script src="../../lib/js/head.min.js"></script>
+    <script src="../../js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: '../../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
+</html>
